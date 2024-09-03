@@ -33,7 +33,7 @@ B01001_Headers = ["18_19_YEARS", "20_24_YEARS", "25_29_YEARS", "30_34_YEARS", "3
                   "45_49_YEARS", "50_54_YEARS", "55_59_YEARS", "60_64_YEARS", "65_69_YEARS", "70_74_YEARS",
                   "75_79_YEARS", "80_84_YEARS", "85+_YEARS"]
 
-year = "2021
+year = "2010"
 api_key = "49099c23404527970655eaa39f3d39c606843dfc"
 r = requests.get(url)
 
