@@ -228,6 +228,11 @@ patterns = [", Franklin County, Massachusetts",
             " city"]
 for pattern in patterns:
     for town in Database_df["COMMUNITY"]:
-        print(town)
+        cleaned_town = re.sub(r"pattern","", town)
+        Database_df["COMMUNITY"].at(town) = cleaned_town
+
+
+print(Database_df.to_string())
+
 
 
