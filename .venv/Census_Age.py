@@ -5,7 +5,8 @@ import numpy as np
 import re
 
 
-year = int(input("Enter the year of data you want to pull: "))
+# year = int(input("Enter the year of data you want to pull: "))
+year = 2022
 year2 = year - 4
 print(f"{year2} - {year}")
 # https://api.census.gov/data/2022/acs/acs5?get=NAME,B01001_001E&for=county:*&in=state:*
@@ -217,22 +218,39 @@ Database_df["CEN_POP_O24"] = Database_df.loc[:, ["25_29_YEARS", "30_34_YEARS","3
 
 
 
-print("Database_df")
-print(Database_df.to_string())
+# print("Database_df")
+
 
 
 patterns = [", Franklin County, Massachusetts",
             ", Hampden County, Massachusetts",
             ", Hampshire County, Massachusetts",
             " town",
-            " city"]
-for pattern in patterns:
-    for town in Database_df["COMMUNITY"]:
-        cleaned_town = re.sub(r"pattern","", town)
-        Database_df["COMMUNITY"].at(town) = cleaned_town
+            " city",
+            " Town"]
+# Create a single regex pattern that matches any of the unwanted substrings
+combined_pattern = "|".join(map(re.escape, patterns))
+
+# Apply the regex substitution to the entire column
+Database_df["COMMUNITY"] = Database_df["COMMUNITY"].apply(lambda x: re.sub(combined_pattern, "", x))
+
+# If you want to strip any leading/trailing whitespace
+Database_df["COMMUNITY"] = Database_df["COMMUNITY"].str.strip()
+
+Database_df = Database_df.sort_values(by="COMMUNITY")
 
 
 print(Database_df.to_string())
+
+
+
+
+
+
+
+
+
+#  print(Database_df.to_string())
 
 
 
