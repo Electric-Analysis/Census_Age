@@ -3,16 +3,20 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import numpy as np
 import re
-
+import pyodbc
 
 # year = int(input("Enter the year of data you want to pull: "))
-year = 2022
+year = 2009
 year2 = year - 4
 print(f"{year2} - {year}")
 # https://api.census.gov/data/2022/acs/acs5?get=NAME,B01001_001E&for=county:*&in=state:*
 # https://www.reddit.com/r/learnpython/comments/jo9825/learning_to_use_the_censusgov_api_i_have_a_lot_of/   #useful code for constructing string
 B01001_URL = "https://api.census.gov/data/"+str(year)+"/acs/acs5?get=group(B01001)&for=county%20subdivision:*&in=state:25%20county:011,013,015"   #THIS  IS BIS
 B09001_URL = "https://api.census.gov/data/"+str(year)+"/acs/acs5?get=group(B09001)&for=county%20subdivision:*&in=state:25%20county:011,013,015"   #THIS  IS BIS
+
+# B01001_URL = "https://api.census.gov/data/2022/acs/acs5?get=group(B01001)&for=tract:*&in=state:25%20county:011,013,015"
+# B09001_URL = "https://api.census.gov/data/2022/acs/acs5?get=group(B09001)&for=tract:*&in=state:25%20county:011,013,015"
+
 
 Census_Row_Specifiers = ['B09001_003','B09001_004','B09001_005','B09001_006','B09001_007','B09001_008','B09001_009',
                    'B01001_031','B01001_007','B01001_008','B01001_009','B01001_010','B01001_032','B01001_033',
@@ -70,12 +74,12 @@ B09001_request = requests.get(B09001_URL)
 B01001_data = B01001_request.json()
 B01001_Age = pd.DataFrame(B01001_data[1:], columns = B01001_data[0], )
 # Sort by county subdivision
-B01001_Age.sort_values('county subdivision', ascending = 0)
+B01001_Age.sort_values('GEO_ID', ascending = 0)
 
 B09001_data = B09001_request.json()
 B09001_Age = pd.DataFrame(B09001_data[1:], columns = B09001_data[0], )
 # Sort by county subdivision
-B09001_Age.sort_values('county subdivision', ascending = 0)
+B09001_Age.sort_values('GEO_ID', ascending = 0)
 
 
 #Preprocessing, zip two columns from imported tables together and check that they both match and have membership in the communities list
@@ -107,12 +111,12 @@ truth_table = []
 
 for i, j in zip(B01001_Age["county subdivision"], B09001_Age["county subdivision"]):
     if i == j:
-        truth_table.append(1)
+        truth_table.append(0)
         print(f"B01001: {i}\tB09001: {j} T")
     else:
         print(False)
         print(f"B01001: {i}\tB09001{j}\t FALSE")
-        truth_table.append(0)
+        truth_table.append(1)
 
 # print(truth_table)
 
@@ -239,7 +243,7 @@ Database_df["COMMUNITY"] = Database_df["COMMUNITY"].str.strip()
 
 Database_df = Database_df.sort_values(by="COMMUNITY")
 
-
+print("\nDatabase_df")
 print(Database_df.to_string())
 
 
@@ -249,7 +253,10 @@ print(Database_df.to_string())
 
 
 
-
+if sum(truth_table) == 0:
+    print("\n\nYou may proceed with downloading data")
+else:
+    print("\n\nSTOP DATA QUALITY IS POOR, DATA MISALIGNMENT!!!!!")
 #  print(Database_df.to_string())
 
 
