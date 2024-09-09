@@ -107,8 +107,9 @@ for i in B01001_Headers:
 for i in B09001_Headers:
     B09001_Age.insert(0, column= i, value= "NAN")
 
-truth_table = []
 
+# Check to make sure towns are aligned and data doesn't get mismatched, make this more robust if you feel the need
+truth_table = []
 for i, j in zip(B01001_Age["county subdivision"], B09001_Age["county subdivision"]):
     if i == j:
         truth_table.append(0)
@@ -218,14 +219,7 @@ Database_df["CEN_POP_O24"] = Database_df.loc[:, ["25_29_YEARS", "30_34_YEARS","3
                                                  "65_69_YEARS", "70_74_YEARS","75_79_YEARS", "80_84_YEARS",
                                                  "85+_YEARS"]].sum(axis = 1)
 
-
-
-
-
-# print("Database_df")
-
-
-
+# Clean up the community names
 patterns = [", Franklin County, Massachusetts",
             ", Hampden County, Massachusetts",
             ", Hampshire County, Massachusetts",
@@ -246,13 +240,6 @@ Database_df = Database_df.sort_values(by="COMMUNITY")
 print("\nDatabase_df")
 print(Database_df.to_string())
 
-
-
-
-
-
-
-
 if sum(truth_table) == 0:
     print("\n\nYou may proceed with downloading data")
 else:
@@ -261,3 +248,11 @@ else:
 
 
 
+# 88888888ba   8b           d8  88888888ba     ,ad8888ba,       88888888ba,
+# 88      "8b  `8b         d8'  88      "8b   d8"'    `"8b      88      `"8b                 ,d
+# 88      ,8P   `8b       d8'   88      ,8P  d8'                88        `8b                88
+# 88aaaaaa8P'    `8b     d8'    88aaaaaa8P'  88                 88         88  ,adPPYYba,  MM88MMM  ,adPPYYba,
+# 88""""""'       `8b   d8'     88""""""'    88                 88         88  ""     `Y8    88     ""     `Y8
+# 88               `8b d8'      88           Y8,                88         8P  ,adPPPPP88    88     ,adPPPPP88
+# 88                `888'       88            Y8a.    .a8P      88      .a8P   88,    ,88    88,    88,    ,88
+# 88                 `8'        88             `"Y8888Y"'       88888888Y"'    `"8bbdP"Y8    "Y888  `"8bbdP"Y8
