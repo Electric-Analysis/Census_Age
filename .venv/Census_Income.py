@@ -21,7 +21,7 @@ Database_df_Headers = ['Less than $10,000', 'Percent Less than $10,000', '$10,00
                        'Percent $100,000 to $149,999', '$150,000 to $199,999', 'Percent $150,000 to $199,999',
                        '$200,000 or more', 'Percent $200,000 or more']
 
-year = 2012
+year = 2009
 year2  = year - 4
 B19001_URL = "https://api.census.gov/data/"+str(year)+"/acs/acs5?get=group(B19001)&for=county%20subdivision:*&in=state:25%20county:011,013,015"
 B19001_request = requests.get(B19001_URL)
