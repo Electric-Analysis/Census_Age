@@ -11,7 +11,7 @@ of geography. Additionally code is being developed to include Pioneer Valley and
 row aggregates of county level data. By running this script the user will make an API call to the census bureau in 3
 seperate instances. First it will call for the county subdivision level data, then again for the county level data,
 last it will call for the state level data (just a single row). Next the data will be converted into a format that is 
-readably by python and put into a dataframe or a table. These tables will then be merged so the county and state level
+readable by python and put into a dataframe or a table. These tables will then be merged so the county and state level
 data are in-line with county sub-division level data in one table. Following this columns are inserted into this merged
 dataframe and then data is extracted from the dataset and filled into the new columns. This is the data we want in our
 final output. Once all the data is reported and calculated in these columns that we made we then initialize an empty 
@@ -21,9 +21,9 @@ complete with all the static information that is typical to any other table we k
 TIME_VALUE, YEAR, and each table specific column. Finally now that we have all the data we need in one spot with the 
 extra data stripped away we can clean up the community names so they are less descriptive and more readable at a glance.
 Lastly now that the table is full  of accurate and readable information we can print this table to a csv file designated
-to a directory and with the year of the data request built into the name. 
+to a directory and with the year of the data request built into the name. The year is also built into the dataframe.
 
-NOTE: if you have a file open with the same
+NOTE: if you have a file open with the same name
 as a file you are trying to create it will throw an error. For example you have Census_Income_2022 open. When you try to 
 get census income for 2021 it will work but 2022 will not because its open, make sure you close it. This WILL overwrite 
 any data in existing files with the same name. Comment out the last line of code to skip writing to csv by adding a 
@@ -52,6 +52,8 @@ Database_df_Headers = ['Less than $10,000', 'Percent Less than $10,000', '$10,00
                        '$75,000 to $99,999', 'Percent $75,000 to $99,999', '$100,000 to $149,999',
                        'Percent $100,000 to $149,999', '$150,000 to $199,999', 'Percent $150,000 to $199,999',
                        '$200,000 or more', 'Percent $200,000 or more']
+
+
 
 dataframes = []
 
@@ -184,7 +186,116 @@ Database_df = Database_df.sort_values(by="COMMUNITY")
 print("\n\nDatabase Dataframe")
 print(Database_df.to_string())
 
-# Database_df.to_csv("C:/Users/jtilsch/OneDrive - Pioneer Valley Planning Commission/Desktop/Projects/Database Design/Data/Census Income Data/Census Income " + str(year) + ".csv")
+# Initialize a new table that we will use to create the regional level geography
+# Once the table is built and filled with NANs loop in a list of column headers
+# Once headers are in set each column choreograph the geographies to their respective regional variable
+# Pioneer Valley  = Hampden, Hampshire, Franklin
+# PVPC Region = Hampden, Hampshire
+
+regional_variables  = ["PVPC Region","Pioneer Valley"]
+pvpc_counties = ["Hampden County, Massachusetts" ,"Hampshire County, Massachusetts"]
+pioneer_valley_counties = ["Hampden County, Massachusetts" ,"Hampshire County, Massachusetts", "Franklin County, Massachusetts"]
+# community_series = pd.Series(ordered_communities)
+Regional_df = pd.DataFrame(np.nan, index = range(len(regional_variables)), columns = Database_df_Headers)
+Regional_df.insert(0, "YEAR", year)
+Regional_df.insert(0, "TIME_VALUE", f"{year2}-{year}")
+Regional_df.insert(0, "TIME_TYPE", "5-Year-Estimates")
+Regional_df.insert(0, "COMMUNITY", regional_variables)
+Regional_df.insert(0, "STATE", "MA")
+
+
+
+# counties for Regional Variables in Regional_df, from merged dataframe
+
+# Regional_df['PVPC Region'] =
+# Get the totals for each row of data in the Regional_df and use it to get the percentage columns
+pvpc_region_total = merged_df[merged_df['NAME'].isin(pvpc_counties)]['B19001_001E'].sum()
+pioneer_valley_total = merged_df[merged_df['NAME'].isin(pioneer_valley_counties)]['B19001_001E'].sum()
+
+# for region in regional_variables:
+#     for header in Database_df_Headers:
+#         if "Percent" not in header:
+#             data = merged_df[merged_df['NAME'].isin(pvpc_counties)][header].sum()
+#             Regional_df[header] = data
+
+
+
+
+
+print(pvpc_region_total, pioneer_valley_total)
+
+print("Regional df")
+print(Regional_df.to_string())
+
+# Fill in data from B19001
+# Fill in row 0, PVPC Region
+Regional_df.loc[0, 'Less than $10,000'] = merged_df[merged_df['NAME'].isin(pvpc_counties)]['Less than $10,000'].sum()
+Regional_df.loc[0, '$10,000 to $14,999'] = merged_df[merged_df['NAME'].isin(pvpc_counties)]['$10,000 to $14,999'].sum()
+Regional_df.loc[0, '$10,000 to $14,999'] = merged_df[merged_df['NAME'].isin(pvpc_counties)]['$10,000 to $14,999'].sum()
+Regional_df.loc[0, '$15,000 to $24,999'] = merged_df[merged_df['NAME'].isin(pvpc_counties)]['$15,000 to $24,999'].sum()
+Regional_df.loc[0, '$25,000 to $34,999'] = merged_df[merged_df['NAME'].isin(pvpc_counties)]['$25,000 to $34,999'].sum()
+Regional_df.loc[0, '$35,000 to $49,999'] = merged_df[merged_df['NAME'].isin(pvpc_counties)]['$35,000 to $49,999'].sum()
+Regional_df.loc[0, '$50,000 to $74,999'] = merged_df[merged_df['NAME'].isin(pvpc_counties)]['$50,000 to $74,999'].sum()
+Regional_df.loc[0, '$75,000 to $99,999'] = merged_df[merged_df['NAME'].isin(pvpc_counties)]['$75,000 to $99,999'].sum()
+Regional_df.loc[0, '$100,000 to $149,999'] = merged_df[merged_df['NAME'].isin(pvpc_counties)]['$100,000 to $149,999'].sum()
+Regional_df.loc[0, '$150,000 to $199,999'] = merged_df[merged_df['NAME'].isin(pvpc_counties)]['$150,000 to $199,999'].sum()
+Regional_df.loc[0, '$200,000 or more'] = merged_df[merged_df['NAME'].isin(pvpc_counties)]['$200,000 or more'].sum()
+# Calculate percent columns for PVPC Region
+Regional_df.loc[0, 'Percent Less than $10,000'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['Less than $10,000'].sum() / pvpc_region_total, 4)
+Regional_df.loc[0, 'Percent $10,000 to $14,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$10,000 to $14,999'].sum() / pvpc_region_total, 4)
+Regional_df.loc[0, 'Percent $10,000 to $14,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$10,000 to $14,999'].sum() / pvpc_region_total, 4)
+Regional_df.loc[0, 'Percent $15,000 to $24,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$15,000 to $24,999'].sum() / pvpc_region_total, 4)
+Regional_df.loc[0, 'Percent $25,000 to $34,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$25,000 to $34,999'].sum() / pvpc_region_total, 4)
+Regional_df.loc[0, 'Percent $35,000 to $49,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$35,000 to $49,999'].sum() / pvpc_region_total, 4)
+Regional_df.loc[0, 'Percent $50,000 to $74,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$50,000 to $74,999'].sum() / pvpc_region_total, 4)
+Regional_df.loc[0, 'Percent $75,000 to $99,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$75,000 to $99,999'].sum() / pvpc_region_total, 4)
+Regional_df.loc[0, 'Percent $100,000 to $149,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$100,000 to $149,999'].sum() / pvpc_region_total, 4)
+Regional_df.loc[0, 'Percent $150,000 to $199,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$150,000 to $199,999'].sum() / pvpc_region_total, 4)
+Regional_df.loc[0, 'Percent $200,000 or more'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$200,000 or more'].sum() / pvpc_region_total, 4)
+
+# Fill in row 1, Pioneer Valley
+Regional_df.loc[1, 'Less than $10,000'] = merged_df[merged_df['NAME'].isin(pioneer_valley_counties)]['Less than $10,000'].sum()
+Regional_df.loc[1, '$10,000 to $14,999'] = merged_df[merged_df['NAME'].isin(pioneer_valley_counties)]['$10,000 to $14,999'].sum()
+Regional_df.loc[1, '$10,000 to $14,999'] = merged_df[merged_df['NAME'].isin(pioneer_valley_counties)]['$10,000 to $14,999'].sum()
+Regional_df.loc[1, '$15,000 to $24,999'] = merged_df[merged_df['NAME'].isin(pioneer_valley_counties)]['$15,000 to $24,999'].sum()
+Regional_df.loc[1, '$25,000 to $34,999'] = merged_df[merged_df['NAME'].isin(pioneer_valley_counties)]['$25,000 to $34,999'].sum()
+Regional_df.loc[1, '$35,000 to $49,999'] = merged_df[merged_df['NAME'].isin(pioneer_valley_counties)]['$35,000 to $49,999'].sum()
+Regional_df.loc[1, '$50,000 to $74,999'] = merged_df[merged_df['NAME'].isin(pioneer_valley_counties)]['$50,000 to $74,999'].sum()
+Regional_df.loc[1, '$75,000 to $99,999'] = merged_df[merged_df['NAME'].isin(pioneer_valley_counties)]['$75,000 to $99,999'].sum()
+Regional_df.loc[1, '$100,000 to $149,999'] = merged_df[merged_df['NAME'].isin(pioneer_valley_counties)]['$100,000 to $149,999'].sum()
+Regional_df.loc[1, '$150,000 to $199,999'] = merged_df[merged_df['NAME'].isin(pioneer_valley_counties)]['$150,000 to $199,999'].sum()
+Regional_df.loc[1, '$200,000 or more'] = merged_df[merged_df['NAME'].isin(pioneer_valley_counties)]['$200,000 or more'].sum()
+# Calculate percent columns for Pioneer Valley
+Regional_df.loc[1, 'Percent Less than $10,000'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['Less than $10,000'].sum() / pioneer_valley_total, 4)
+Regional_df.loc[1, 'Percent $10,000 to $14,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$10,000 to $14,999'].sum() / pioneer_valley_total, 4)
+Regional_df.loc[1, 'Percent $10,000 to $14,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$10,000 to $14,999'].sum() / pioneer_valley_total, 4)
+Regional_df.loc[1, 'Percent $15,000 to $24,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$15,000 to $24,999'].sum() / pioneer_valley_total, 4)
+Regional_df.loc[1, 'Percent $25,000 to $34,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$25,000 to $34,999'].sum() / pioneer_valley_total, 4)
+Regional_df.loc[1, 'Percent $35,000 to $49,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$35,000 to $49,999'].sum() / pioneer_valley_total, 4)
+Regional_df.loc[1, 'Percent $50,000 to $74,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$50,000 to $74,999'].sum() / pioneer_valley_total, 4)
+Regional_df.loc[1, 'Percent $75,000 to $99,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$75,000 to $99,999'].sum() / pioneer_valley_total, 4)
+Regional_df.loc[1, 'Percent $100,000 to $149,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$100,000 to $149,999'].sum() / pioneer_valley_total, 4)
+Regional_df.loc[1, 'Percent $150,000 to $199,999'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$150,000 to $199,999'].sum() / pioneer_valley_total, 4)
+Regional_df.loc[1, 'Percent $200,000 or more'] = round(merged_df[merged_df['NAME'].isin(pvpc_counties)]['$200,000 or more'].sum() / pioneer_valley_total, 4)
+
+# Loop for calculating and reporting values for regional values, shelved for now
+# for row in range(2):
+#     for header in Database_df_Headers:
+#         if "Percent" not in header:
+#             if row == 0:
+#                 variable_indicator = pvpc_region_total
+#             else:
+#                 variable_indicator = pioneer_valley_total
+#             Regional_df.loc[row, header] = merged_df[merged_df['NAME'].isin(variable_indicator)][header].sum()
+# #
+# print(Regional_df.to_string())
+# Concatenate the regional and database dataframe so we can have all the data together in one spot
+Database_df = pd.concat([Database_df, Regional_df], ignore_index= True, sort = False)
+
+print(Database_df.to_string())
+
+# Create a csv of the dataframe that was just produced
+Database_df.to_csv("C:/Users/jtilsch/OneDrive - Pioneer Valley Planning Commission/Desktop/Projects/Database Design/Data/Census Income Data/Census Income " + str(year) + ".csv")
 
 
 
