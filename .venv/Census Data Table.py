@@ -55,7 +55,21 @@ dataframe_df_communities = ['Agawam','Amherst','Ashfield','Belchertown','Bernard
                             'Ware','Warwick','Wendell','West Springfield','Westfield','Westhampton','Whately',
                             'Wilbraham','Williamsburg','Worthington']
 
-print("Note to user:\nDataframe Header, Base Table, Table_row\n")
+# this table is missing 2 values, base table and api access have 65 values, 67 headers
+address_book_df = pd.DataFrame({"API Access":[1,0,0,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,
+                                              0,0,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+                                "Base Table":['B02001','NA','NA','NA','B02001','B02001','B02001','B02001','B02001',
+                                              'B02001','B03001','B19001','B09005','NA','B05009','B16004','B16004',
+                                              'B16004','B16004','B05002','B05007','NA','NA','NA','NA','B08006','B15003',
+                                              'B06009','B19013','B19053','B19055','B19057','B19059','B19113','NA','NA',
+                                              'B19083','B17025','B17025','B17025','B17024','B17024','B17026','B17025',
+                                              'NA','NA','NA','B19001','NA','B19001','NA','B19001','NA','B19001','NA',
+                                              'B19001','NA','B19001','NA','B19001','NA','B19001','NA','B19001','NA',
+                                              'B19001','NA'],
+                                }, index= dataframe_df_headers)
+
+
+
 API_map = [("CEN_POP","B02001","B02001_001"),
            ("CEN_WORKERS","None"),                                                              #No data available via API
            ("CEN_URBANPOP","None"),                                                             #No data available via API
@@ -142,7 +156,7 @@ print(Database_df.to_string())
 # for row in API_map:
 #     print(row[1])
 
-
+print(address_book_df.to_string())
 
 
 
